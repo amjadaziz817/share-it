@@ -1,19 +1,19 @@
-# Each push to main builds the debug APK and publishes it as a new GitHub release.
+# When you publish a release on GitHub, this builds the debug APK and attaches it to that release.
+# Commits and merges do not make a release.
 name: Release
 
 on:
-  push:
-    branches: [main]
-    paths-ignore: ["**.md"] # documentation changes do not make a release
+  release:
+    types: [published]
 
 permissions:
-  contents: write # create the release and its tag
+  contents: write # upload the APK and edit the release notes
 
 jobs:
-  release:
+  apk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # checks out the release tag
 
       - uses: actions/setup-go@v5
         with:
@@ -39,15 +39,17 @@ jobs:
 
       - name: Build the APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: ./gradlew assembleDebug -Pshareit.version="${TAG#v}"
 
-      - name: Publish the release
+      - name: Attach the APK and the install notes
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
-          TAG="v0.2.${{ github.run_number }}"
           cp android/app/build/outputs/apk/debug/share-it-debug.apk share-it.apk
-          cp .github/release-notes.md notes.md
-          printf '\nSHA-256 of share-it.apk: `%s`\n' "$(sha256sum share-it.apk | cut -d' ' -f1)" >> notes.md
-          gh release create "$TAG" share-it.apk --target "$GITHUB_SHA" --title "share-it $TAG" \
-            --notes-file notes.md --generate-notes
+          gh release upload "$TAG" share-it.apk --clobber
+          { gh release view "$TAG" --json body -q .body; echo; cat .github/release-notes.md
+            printf '\nSHA-256 of share-it.apk: `%s`\n' "$(sha256sum share-it.apk | cut -d' ' -f1)"; } > notes.md
+          gh release edit "$TAG" --notes-file notes.md

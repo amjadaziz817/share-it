@@ -12,7 +12,8 @@ android {
         targetSdk = 36
         // Build number from the build time: each new APK is newer, and the app shows when it was built.
         versionCode = (System.currentTimeMillis() / 60_000).toInt()
-        versionName = "0.2 (build " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + ")"
+        // The release workflow sets shareit.version from the release tag (v0.3.0 -> 0.3.0).
+        versionName = providers.gradleProperty("shareit.version").getOrElse("dev") + " (build " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + ")"
     }
     // A fixed debug key in the repo, so each CI build installs as an update over the one before.
     // Its password is the public default "android": the key is not a secret.

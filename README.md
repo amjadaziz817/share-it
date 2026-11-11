@@ -161,7 +161,7 @@ No. share-it is a normal app. It needs only the All files access permission.
 
 ## Status
 
-share-it is an early version. The developer uses it with macOS Finder and Android phones. The Windows steps follow the standard WebDAV setup for Windows, but nobody has tested them with share-it yet. Bug reports and pull requests are welcome.
+share-it is an early version. The developer uses it with macOS Finder and Android phones. The Windows steps follow the standard WebDAV setup for Windows, but nobody has tested them with share-it yet. Bug reports and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

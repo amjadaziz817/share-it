@@ -1,5 +1,3 @@
-share-it shows your Android phone in Finder (Mac) or File Explorer (Windows) over Wi-Fi.
-
 ## Install
 
 1. Download `share-it.apk` (below) on your Android phone. You need Android 11 or later.
