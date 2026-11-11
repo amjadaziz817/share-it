@@ -14,6 +14,18 @@ android {
         versionCode = (System.currentTimeMillis() / 60_000).toInt()
         versionName = "0.2 (build " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + ")"
     }
+    // The release key is outside the repo: set shareit.storeFile and shareit.storePassword in ~/.gradle/gradle.properties.
+    val storeFile = providers.gradleProperty("shareit.storeFile").orNull
+    if (storeFile != null) {
+        val pass = providers.gradleProperty("shareit.storePassword").get()
+        signingConfigs.create("release") {
+            this.storeFile = file(storeFile)
+            storePassword = pass
+            keyAlias = "share-it"
+            keyPassword = pass
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+    }
 }
 
 base { archivesName = "share-it" } // APK name: share-it-<buildType>.apk

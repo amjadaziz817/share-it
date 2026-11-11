@@ -37,7 +37,7 @@ The app runs a small WebDAV server on the phone, on port 8080. The computer moun
 
 ### 1. On the phone
 
-1. Install the APK (see [Build](#build)).
+1. Download `share-it.apk` from the [latest release](https://github.com/amjadaziz817/share-it/releases/latest) and open it on the phone. Android asks you to allow installs from your browser or Files app. You can also build the APK yourself (see [Build](#build)).
 2. Open **share-it** and tap **Start sharing**.
 3. The first time, Android asks for **All files access**. Allow it, go back, and tap **Start sharing** again.
 4. The app shows a URL, a name and a password, for example:
