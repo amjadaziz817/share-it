@@ -1,0 +1,52 @@
+# Each push to main builds the debug APK and publishes it as a new GitHub release.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md"] # documentation changes do not make a release
+
+permissions:
+  contents: write # create the release and its tag
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Test the server
+        run: go test ./server
+
+      - name: Build server.aar
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_LATEST_HOME }}
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@$(go list -m -f '{{.Version}}' golang.org/x/mobile)
+          gomobile init
+          gomobile bind -target=android/arm64,android/amd64 -androidapi 30 -javapkg com.shareit \
+            -o android/app/libs/server.aar ./server
+
+      - name: Build the APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v0.2.${{ github.run_number }}"
+          cp android/app/build/outputs/apk/debug/share-it-debug.apk share-it.apk
+          cp .github/release-notes.md notes.md
+          printf '\nSHA-256 of share-it.apk: `%s`\n' "$(sha256sum share-it.apk | cut -d' ' -f1)" >> notes.md
+          gh release create "$TAG" share-it.apk --target "$GITHUB_SHA" --title "share-it $TAG" \
+            --notes-file notes.md --generate-notes
